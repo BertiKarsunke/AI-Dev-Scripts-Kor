@@ -9,6 +9,7 @@ current_date=$(date +%Y-%m-%d)
 # Create a markdown file for review
 review_file="review-$current_date.md"
 prompt="\n Review this code, provide suggestions for improvement, coding best practices, improve readability, and maintainability. Remove any code smells and anti-patterns. Provide code examples for your suggestion. Respond in markdown format. If the file does not have any code or does not need any changes, say 'No changes needed'."
+translatePrompt="\n 이 내용에서 code를 제외한 부분만 한국어로 번역해줘"
 touch "$review_file"
 
 # Function to review files
@@ -20,10 +21,11 @@ review_files() {
         echo "Reviewing $file"
         content=$(cat "$file")
         ollama_suggestions=$(ollama run deepseek-coder:6.7b-instruct "Code: $content $prompt")
+        ollama_translate=$(ollama run mistral:7b-instruct "$ollama_suggestions $translatePrompt")
 
         # Write suggestions to the review file
         echo "# Suggestions for $file" >> "$review_file"
-        echo "$ollama_suggestions" >> "$review_file"
+        echo "$ollama_translate" >> "$review_file"
         echo "" >> "$review_file"
     done
 }
